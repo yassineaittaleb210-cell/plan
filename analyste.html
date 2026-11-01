@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon analyste de performance</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f5f1;--card:#fff;--tx:#1f2328;--mu:#6b7280;--bd:#e3e1da;--ac:#2f5fa8;--ok:#2f9e6e;--wa:#d99a1c;--ko:#d4472b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181b;--card:#202226;--tx:#ececec;--mu:#9aa0a8;--bd:#33363c;--ac:#6f9be0}}
+:root[data-theme="dark"]{--bg:#17181b;--card:#202226;--tx:#ececec;--mu:#9aa0a8;--bd:#33363c;--ac:#6f9be0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,"Segoe UI",Arial,sans-serif;padding:16px;max-width:900px;margin-inline:auto;line-height:1.5}
+h1{font-size:20px;margin:4px 0 12px}h2{font-size:16px;margin:0 0 8px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:8px 12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;cursor:pointer;font:inherit}
+.tab.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+input,textarea,select{font:inherit;color:var(--tx);background:transparent;border:1px solid var(--bd);border-radius:6px;padding:6px;min-width:0;width:100%}
+select option{background:var(--card);color:var(--tx)}
+textarea{min-height:60px;resize:vertical}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:6px 12px}
+button.p,button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+label{display:flex;flex-direction:column;font-size:13px;color:var(--mu);gap:3px;margin-bottom:10px}
+.name{font-size:18px;font-weight:600}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+.g>div{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}
+.g small{color:var(--mu);font-size:12px;display:block}.g b{font-size:21px}
+.mu{color:var(--mu);font-size:13px}
+.ok{color:var(--ok)}.wa{color:var(--wa)}.ko{color:var(--ko)}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--mu);font-size:11px;font-family:inherit}
+.leg{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;margin-top:6px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-inline-end:4px}
+.ins{border-inline-start:4px solid var(--ac);padding:6px 10px;margin-bottom:6px;font-size:14px;background:var(--bg);border-radius:6px}
+.en{border:1px solid var(--bd);border-radius:10px;padding:10px;margin-bottom:10px}
+.en .h{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+.sc{font-weight:700;color:#fff;border-radius:14px;padding:2px 10px;font-size:14px}
+.en p{margin:4px 0;font-size:14px;white-space:pre-wrap}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>label{flex:1;min-width:120px}
+#toasts{position:fixed;top:0;left:0;right:0;z-index:9;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 0;pointer-events:none}
+#toasts .ins{pointer-events:auto;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.ev{display:flex;gap:10px;align-items:center;padding:8px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;font-size:14px}
+.ev time{font-weight:700;min-width:96px}.ev.now{border-color:var(--ac);background:rgba(47,95,168,.12)}.ev.past{opacity:.5}
+:root{--bk:#111}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bk:#000}}:root[data-theme="dark"]{--bk:#000}
+.ck{flex-direction:row;align-items:center;border:1px solid var(--bd);border-radius:14px;padding:3px 10px;margin:0;color:var(--tx)}.ck input{width:auto}
+.bar{height:12px;background:var(--bd);border-radius:6px;overflow:hidden;margin:6px 0}.bar i{display:block;height:100%;border-radius:6px}
+pre{white-space:pre-wrap;font:inherit;font-size:14px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px}
+
+body{background:linear-gradient(180deg,var(--bg) 0%,color-mix(in srgb,var(--ac) 9%,var(--bg)) 100%);background-attachment:fixed}
+h1{font-size:26px;background:linear-gradient(90deg,#2f5fa8,#a04bb8,#d4472b,#d99a1c);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.card{box-shadow:0 3px 10px rgba(0,0,0,.07)}
+.tab{font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+button.p{background:linear-gradient(135deg,var(--ac),color-mix(in srgb,var(--ac) 60%,#a04bb8));border:none;box-shadow:0 2px 5px rgba(0,0,0,.18)}
+.g>div:nth-child(1){border-top:4px solid #2f5fa8;background:color-mix(in srgb,#2f5fa8 8%,var(--card))}
+.g>div:nth-child(2){border-top:4px solid #2f9e6e;background:color-mix(in srgb,#2f9e6e 8%,var(--card))}
+.g>div:nth-child(3){border-top:4px solid #d99a1c;background:color-mix(in srgb,#d99a1c 8%,var(--card))}
+.ins{background:color-mix(in srgb,var(--ac) 8%,var(--card))}
+.ck{background:color-mix(in srgb,var(--ac) 6%,var(--card))}
+.ev{box-shadow:0 1px 3px rgba(0,0,0,.06)}
+</style>
+</head>
+<body>
+<h1>🧭 Mon analyste de performance</h1>
+<div class="tabs" id="tabs"></div>
+<div id="toasts"></div>
+<div id="main"></div>
+<script>
+const $=id=>document.getElementById(id);
+const ld=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const fm=s=>s.split("-").reverse().join("/");
+const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+const ago=d=>Math.round((Date.parse(ld())-Date.parse(d))/864e5);
+const COLS=["#2f5fa8","#d99a1c","#2f9e6e","#a04bb8","#d4472b","#0f9aa8","#8a6d3b","#c2478c"];
+const COL=new Proxy(COLS,{get:(a,k)=>/^\d+$/.test(String(k))?a[k%a.length]:a[k]});
+const DN=["Français","Anglais","Formation Export","Relations & Santé"];
+const MO=[["Motivé","😄"],["Serein","😌"],["Fatigué","😴"],["Stressé","😰"],["Découragé","😞"]];
+const OB=["Temps","Concentration","Motivation","Fatigue / santé","Ressources","Organisation","Stress"];
+const KEY="pa2";
+let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+if(!S||!S.tabs){
+  /* Application neuve : 4 domaines, même structure (vision + objectifs), tâches vides, planning de base répété chaque jour */
+  const rid=()=>Math.random().toString(36).slice(2,8);
+  const dom0=(name,w,g,d,og)=>({id:"d"+rid(),name,v:{w,g,d},k:[],e:[],og:og.map(([t,dd])=>({id:"g"+rid(),t,d:dd,tk:[]}))});
+  const T=[
+   dom0("Français","Atteindre un niveau B2 en français et communiquer avec aisance dans les situations professionnelles et quotidiennes.","Niveau B2 en français","",
+     [["Terminer 20 étapes de l’application avant le 27 décembre 2026, reproduire les dialogues sans consulter le texte et enregistrer 20 podcasts","2026-12-27"]]),
+   dom0("Anglais","Maîtriser les bases de l’anglais professionnel pour communiquer avec des clients et des partenaires internationaux.","Bases de l’anglais professionnel","",
+     [["Terminer 20 étapes avant le 27 décembre 2026, apprendre 300 mots professionnels et savoir me présenter, présenter une entreprise et poser des questions commerciales simples","2026-12-27"]]),
+   dom0("Formation Export","Devenir un spécialiste du commerce international et de l’export, maîtrisant les opérations d’exportation, l’analyse des coûts et la gestion des expéditions, avec une bonne maîtrise professionnelle du français et de l’anglais d’ici le 18 octobre 2029.","Spécialiste du commerce international et de l’export","2029-10-18",
+     [["Étudier et traiter 11 dossiers d’exportation complets avant le 3 janvier 2027, de la réception de la demande du client jusqu’à la livraison et à la clôture du dossier","2027-01-03"]]),
+   dom0("Relations & Santé","Devenir une personne confiante, capable de communiquer avec les autres et de gérer son stress, et construire un mode de vie sain et équilibré grâce à l’activité physique, à une bonne hygiène personnelle et à une meilleure gestion de mes pensées.","Personne confiante, relations saines et mode de vie équilibré","",
+     [["Améliorer ma communication, ma confiance en moi et ma capacité à gérer les désaccords au cours des trois prochains mois","2027-01-10"],
+      ["Améliorer ma condition physique, mon hygiène personnelle et mon équilibre mental au cours des trois prochains mois","2027-01-10"]])
+  ];
+  const td0=ld(),t0=Date.now();
+  const bp=(i,t,s,e,k)=>({id:(t0+i)+"-"+rid(),t,d:7,s,e,k:"t",r:10,m:T[k].id,all:1,core:1});
+  S={cur:"p",ci:[],tabs:T,tl:{},tm:null,fired:{},dc:[],ck:{},cl:{},wk:{},ws:td0,ac:td0,
+     pl:[bp(0,"Étape de français","14:00","15:00",0),bp(1,"Étape d’anglais","15:30","16:30",1),bp(2,"Formation (cours export)","09:00","11:30",2)]};
+  save();
+}
+S.tl=S.tl||{};S.tm=S.tm||null;S.pl=S.pl||[];S.fired=S.fired||{};S.dc=S.dc||[];S.ck=S.ck||{};S.tabs.forEach((t,i)=>{t.id=t.id||"d"+i+Math.random().toString(36).slice(2,6)});
+let EID=null,RP=30;if(["o","t","j","r"].includes(String(S.cur)))S.cur="0";
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const scc=v=>v>=7?"var(--ok)":v>=4?"var(--wa)":"var(--ko)";
+const pcc=p=>p>=70?"var(--ok)":p>=40?"var(--wa)":"var(--ko)";
+const tr=d=>Math.abs(d)<0.5?"→ Stable":d>0?"↗ Progrès":"↘ Recul";
+const trc=d=>Math.abs(d)<0.5?"":d>0?"ok":"ko";
+const by=(a,b)=>a.d<b.d?-1:a.d>b.d?1:0;
+function stats(t,days){
+  const a=t.e.filter(e=>!days||ago(e.d)<days).sort(by);if(!a.length)return null;
+  const v=a.map(e=>+e.sc),rc=v.slice(-3),bf=v.slice(0,-3),ob={},mo={};
+  a.forEach(e=>{(e.ob||[]).forEach(o=>ob[o]=(ob[o]||0)+1);if(e.m)(mo[e.m]=mo[e.m]||[]).push(+e.sc)});
+  return {a,n:a.length,sc:avg(v),en:avg(a.map(e=>+e.en)),h:a.reduce((x,e)=>x+(+e.h||0),0),
+    diff:bf.length?avg(rc)-avg(bf):(v.length>1?v[v.length-1]-v[0]:0),ob,mo,days:new Set(a.map(e=>e.d)).size,last:v[v.length-1],dd:ago(a[a.length-1].d)};
+}
+function kc(k){
+  const s=+k.s||0,t=+k.t;if(k.t===""||k.t==null||isNaN(t)||t===s)return null;
+  const l=(k.log||[]).slice().sort(by),c=l.length?+l[l.length-1].v:s,p=Math.max(0,Math.min((c-s)/(t-s),1));
+  let ex=null;if(k.sd&&k.dd&&k.dd>k.sd)ex=Math.max(0,Math.min((Date.parse(ld())-Date.parse(k.sd))/(Date.parse(k.dd)-Date.parse(k.sd)),1));
+  return {c,p,t,st:p>=1||ex===null?"ok":ex-p>0.15?"ko":ex-p>0.02?"wa":"ok"};
+}
+function perf(t){
+  const s=stats(t,30),ks=t.k.map(kc).filter(Boolean);let w=0,x=0;
+  if(s){w+=.6;x+=.4*s.sc/10+.2*Math.min(1,s.days/12)}
+  if(ks.length){w+=.4;x+=.4*avg(ks.map(q=>q.p))}
+  return w?Math.round(x/w*100):null;
+}
+function ins(t){
+  const s=stats(t,0),o=[];if(!s)return ["Aucun bilan pour l'instant : commencez par une première entrée."];
+  const ob=Object.entries(s.ob).sort((a,b)=>b[1]-a[1]);
+  if(ob.length)o.push(`🚧 Obstacle n°1 : <b>${ob[0][0]}</b> (${ob[0][1]} fois sur ${s.n} bilans)`);
+  const hi=s.a.filter(e=>+e.en>=4).map(e=>+e.sc),lo=s.a.filter(e=>+e.en<=2).map(e=>+e.sc);
+  if(hi.length&&lo.length&&avg(hi)-avg(lo)>=1.5)o.push(`⚡ Votre progression dépend de votre énergie : ${avg(hi).toFixed(1)}/10 quand elle est haute, ${avg(lo).toFixed(1)}/10 quand elle est basse.`);
+  const mm=Object.entries(s.mo).filter(x=>x[1].length>=2).map(([m,v])=>[m,avg(v)]).sort((a,b)=>b[1]-a[1]);
+  if(mm.length>1)o.push(`🧠 Vous progressez le mieux quand vous êtes « ${mm[0][0]} » (${mm[0][1].toFixed(1)}/10) et le moins quand vous êtes « ${mm[mm.length-1][0]} » (${mm[mm.length-1][1].toFixed(1)}/10).`);
+  if(s.n>1)o.push(`📈 Tendance : ${tr(s.diff)}`);
+  const s30=stats(t,30);if(!s30||s30.days<6)o.push("🗓️ Régularité faible : moins de 6 jours de bilan sur 30. Visez 3 bilans par semaine.");
+  t.k.forEach(k=>{const c=kc(k);if(c&&c.st==="ko")o.push(`⛔ KPI en retard : <b>${esc(k.n)}</b>`)});
+  return o;
+}
+function chart(ss){
+  const all=ss.flatMap(s=>s.pts);
+  if(!all.length)return '<p class="mu">Pas encore de données : ajoutez un premier bilan.</p>';
+  const W=640,H=240,L=30,R=12,T0=12,B=26,ts=all.map(p=>Date.parse(p.d)),mn=Math.min(...ts),mx=Math.max(...ts);
+  const X=d=>mx===mn?(L+W-R)/2:L+(W-L-R)*(Date.parse(d)-mn)/(mx-mn),Y=v=>T0+(H-T0-B)*(1-v/10);
+  let o=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let v=0;v<=10;v+=2)o+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--bd)"/><text x="${L-6}" y="${Y(v)+3}" text-anchor="end">${v}</text>`;
+  ss.forEach(s=>{const p=s.pts.slice().sort(by);
+    if(p.length>1)o+=`<polyline fill="none" stroke="${s.c}" stroke-width="2.5" ${s.dash?'stroke-dasharray="6 4"':""} points="${p.map(q=>X(q.d)+","+Y(q.v)).join(" ")}"/>`;
+    p.forEach(q=>o+=`<circle cx="${X(q.d)}" cy="${Y(q.v)}" r="3.5" fill="${s.c}"/>`)});
+  const iso=t=>new Date(t).toISOString().slice(0,10);
+  return o+`<text x="${L}" y="${H-7}">${fm(iso(mn))}</text><text x="${W-R}" y="${H-7}" text-anchor="end">${fm(iso(mx))}</text></svg>`;
+}
+function report(days){
+  const L=[`RAPPORT DE PERFORMANCE — ${days?days+" derniers jours":"toute la période"} (au ${fm(ld())})`,""];
+  S.tabs.forEach(t=>{
+    const s=stats(t,days),p=perf(t);L.push(`## ${t.name} — score de performance : ${p===null?"n/a":p+" %"}`);
+    if(t.v.g)L.push(`Vision : ${t.v.g}${t.v.d?" (avant le "+fm(t.v.d)+")":""}`);
+    (t.goals||[]).forEach(g=>{const c=gcalc(g);if(c)L.push(`Objectif « ${g.t||"sans nom"} » : ${Math.round(c.done/c.h*100)} % des ${c.h} h (temps écoulé ${Math.round((c.t-c.s)/(c.d-c.s)*100)} %)`)});
+    if(!s){L.push("Aucun bilan sur la période.","");return}
+    L.push(`Bilans : ${s.n} · note moyenne ${s.sc.toFixed(1)}/10 · énergie ${s.en.toFixed(1)}/5 · ${s.h} h travaillées · ${tr(s.diff)}`);
+    const ob=Object.entries(s.ob).sort((a,b)=>b[1]-a[1]).slice(0,3);if(ob.length)L.push("Obstacles : "+ob.map(x=>x[0]+" ("+x[1]+")").join(", "));
+    t.k.forEach(k=>{const c=kc(k);if(c)L.push(`KPI ${k.n} : ${Math.round(c.p*100)} % (${c.c}/${c.t} ${k.u||""})`)});
+    const nx=s.a.filter(e=>e.n).slice(-2).map(e=>e.n);if(nx.length)L.push("Prochaines actions : "+nx.join(" | "));
+    ins(t).forEach(x=>L.push("- "+x.replace(/<[^>]+>/g,"")));L.push("");
+  });
+  const ts=tstats(days||60).filter(x=>x.u>0);
+  if(ts.length){const tu=ts.reduce((a,x)=>a+x.u,0),ta=ts.reduce((a,x)=>a+x.av,0),tl=ts.reduce((a,x)=>a+Math.max(0,x.av-x.u),0),wy={};ts.forEach(x=>x.r.why.forEach(w=>wy[w]=(wy[w]||0)+1));
+    L.push(`TEMPS : ${ts.length} jours suivis · ${(tu/ts.length).toFixed(1)} h productives/jour · utilisation ${ta?Math.round(tu/ta*100):0} % · temps sans résultat ${tl.toFixed(1)} h au total`);
+    const w2=Object.entries(wy).sort((a,b)=>b[1]-a[1]).slice(0,3);if(w2.length)L.push("Causes du temps perdu : "+w2.map(x=>x[0]+" ("+x[1]+" j)").join(", "));L.push("")}
+  const c=S.ci.filter(x=>!days||ago(x.d)<days);
+  if(c.length){const m={};c.forEach(x=>m[x.m]=(m[x.m]||0)+1);L.push("Humeur dominante : "+Object.entries(m).sort((a,b)=>b[1]-a[1])[0][0])}
+  return L.join("\n");
+}
+function tabs(){
+  const b=[["d","🧩 Décisions"],["p","📅 Planning"],["g","🎯 Objectifs"],...S.tabs.map((t,i)=>[String(i),esc(t.name)||"Sans nom"])];
+  $("tabs").innerHTML=b.map(x=>{const c=/^\d+$/.test(x[0])?COL[+x[0]]:({d:"#e8743b",p:"#0f9aa8",g:"#4f5bd5",r:"#7a8a99"})[x[0]]||null,on=String(S.cur)===x[0];return `<button class="tab ${on?"on":""}" data-i="${x[0]}" ${c?`style="border:2px solid ${c};${on?`background:${c};color:#fff`:`color:${c};font-weight:600`}"`:""}>${x[1]}</button>`}).join("");
+  $("tabs").querySelectorAll("button").forEach(e=>e.onclick=()=>{S.cur=e.dataset.i;EID=null;save();render()});
+  const ad=document.createElement("button");ad.className="tab";ad.textContent="＋ Domaine";ad.onclick=()=>{S.tabs.push({id:"d"+Date.now(),name:"Nouveau domaine",v:{w:"",g:"",d:""},k:[],e:[]});S.cur=String(S.tabs.length-1);save();render()};$("tabs").appendChild(ad);
+}
+function over(){
+  const rows=S.tabs.map((t,i)=>({t,i,p:perf(t),s:stats(t,0)})),w=rows.filter(r=>r.p!==null),g=[];
+  if(w.length>1){const b=[...w].sort((x,y)=>y.p-x.p);g.push(`💪 Domaine le plus solide : <b>${esc(b[0].t.name)}</b> (${b[0].p} %)`,`🎯 Domaine à prioriser : <b>${esc(b[b.length-1].t.name)}</b> (${b[b.length-1].p} %)`)}
+  const ob={};S.tabs.forEach(t=>t.e.forEach(e=>(e.ob||[]).forEach(o=>ob[o]=(ob[o]||0)+1)));
+  const to=Object.entries(ob).sort((a,b)=>b[1]-a[1])[0];if(to)g.push(`🚧 Obstacle le plus fréquent, tous domaines : <b>${to[0]}</b> (${to[1]} fois)`);
+  rows.filter(r=>r.s&&r.s.dd>=7).forEach(r=>g.push(`📝 Aucun bilan dans <b>${esc(r.t.name)}</b> depuis ${r.s.dd} jours`));
+  const ci=S.ci.slice().sort(by),last=ci[ci.length-1],rec=ci.filter(x=>ago(x.d)<14),hard=rec.filter(x=>["Fatigué","Stressé","Découragé"].includes(x.m)).length;
+  $("main").innerHTML=`<div class="card"><h2>Comment je me sens maintenant ?</h2>
+   <div class="row" id="mo">${MO.map(m=>`<button data-m="${m[0]}">${m[1]} ${m[0]}</button>`).join("")}</div>
+   <label style="margin-top:10px">Énergie : <b id="co">3</b>/5<input type="range" id="ce" min="1" max="5" value="3"></label>
+   <button class="p" id="cs">Enregistrer mon ressenti</button> <span class="mu" id="cm"></span>
+   ${last?`<p class="mu">Dernier ressenti : ${esc(last.m)} · énergie ${last.en}/5 (${fm(last.d)}) · ${rec.length} enregistrement(s) sur 14 jours</p>`:""}
+   ${hard>=3?'<div class="ins">💬 Plusieurs jours difficiles récemment. Parler à un proche ou à un professionnel peut aider si cela dure.</div>':""}</div>
+  <div class="card"><h2>Score de performance (30 derniers jours)</h2>${rows.map(r=>`<div><div style="display:flex;justify-content:space-between"><span style="color:${COL[r.i]}">● ${esc(r.t.name)}</span><b style="color:${r.p===null?"var(--mu)":pcc(r.p)}">${r.p===null?"n/a":r.p+" %"}</b></div><div class="bar"><i style="width:${r.p||0}%;background:${r.p===null?"var(--bd)":pcc(r.p)}"></i></div></div>`).join("")}
+   <p class="mu">Score = 40 % note moyenne des bilans + 20 % régularité + 40 % avancement des KPI (s'il y en a).</p></div>
+  ${g.length?`<div class="card"><h2>Analyse globale</h2>${g.map(x=>`<div class="ins">${x}</div>`).join("")}</div>`:""}
+  <div class="card"><h2>Notes de progression dans le temps</h2>${chart(rows.map(r=>({c:COL[r.i],pts:r.t.e.map(e=>({d:e.d,v:+e.sc}))})))}<div class="leg">${rows.map(r=>`<span><i style="background:${COL[r.i]}"></i>${esc(r.t.name)}</span>`).join("")}</div></div>`;
+  let mm="";const bs=document.querySelectorAll("#mo button");
+  bs.forEach(b=>b.onclick=()=>{mm=b.dataset.m;bs.forEach(x=>x.className="");b.className="on"});
+  $("ce").oninput=e=>{$("co").textContent=e.target.value};
+  $("cs").onclick=()=>{if(!mm){$("cm").textContent="Choisissez une humeur";return}S.ci.push({d:ld(),m:mm,en:+$("ce").value});save();over()};
+}
+function dom(i){
+  const t=S.tabs[i],c=COL[i],td=ld(),VC="#c2478c",OC="#0f9aa8";t.og=t.og||[];
+  const tot=t.og.reduce((a,g)=>a+g.tk.length,0),dn=t.og.reduce((a,g)=>a+g.tk.filter(x=>x.ok).length,0),gp=tot?Math.round(dn/tot*100):0;
+  $("main").innerHTML=`<div class="card" style="border-top:6px solid ${c};background:color-mix(in srgb,${c} 12%,var(--card))"><input class="name" id="tn" style="color:${c}" value="${esc(t.name)}" placeholder="Nom du domaine">${S.tabs.length>1?'<button id="dd" style="margin-top:8px">🗑 Supprimer ce domaine</button>':""}</div>
+  <div class="card" style="border-inline-start:6px solid ${VC};background:color-mix(in srgb,${VC} 10%,var(--card))"><h2 style="color:${VC}">🔭 Ma vision</h2>
+   <label>Pourquoi ce domaine compte pour moi<textarea data-v="w">${esc(t.v.w)}</textarea></label>
+   <div class="row"><label style="flex:2">Où je veux arriver (objectif à long terme)<input data-v="g" value="${esc(t.v.g)}"></label><label>Date visée<input type="date" data-v="d" value="${esc(t.v.d)}"></label></div></div>
+  <div class="card" style="border-inline-start:6px solid ${OC};background:color-mix(in srgb,${OC} 10%,var(--card))"><h2 style="color:${OC}">🎯 Mes objectifs</h2>
+   <p class="mu">Chaque objectif a sa liste de tâches. Quand toutes les tâches sont faites, l'objectif est atteint.</p>
+   ${tot?`<div style="display:flex;justify-content:space-between"><span class="mu">Tâches faites dans ce domaine</span><b>${dn} / ${tot}</b></div><div class="bar"><i style="width:${gp}%;background:${pcc(gp)}"></i></div>`:""}
+   <div class="row" style="align-items:end"><label style="flex:2">Nouvel objectif<input id="ng" placeholder="Ex. : terminer le chapitre 1"></label><label>Date visée<input type="date" id="ngd"></label><button class="p" id="nga" style="margin-bottom:10px">+ Ajouter l'objectif</button></div></div>
+  ${t.og.map((g,j)=>{
+    const d=g.tk.filter(x=>x.ok).length,n=g.tk.length,p=n?Math.round(d/n*100):0,ach=n>0&&d===n,late=!ach&&g.d&&g.d<td;
+    return `<div class="card" style="border-inline-start:6px solid ${ach?"var(--ok)":OC};background:color-mix(in srgb,${ach?"#2f9e6e":OC} 8%,var(--card))">
+    <div class="row" style="align-items:end"><label style="flex:2">🎯 Objectif<input data-gf="${j}" data-k="t" value="${esc(g.t)}"></label><label>Date visée<input type="date" data-gf="${j}" data-k="d" value="${esc(g.d)}"></label></div>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><b>${ach?"🏆 Objectif atteint":late?'<span class="ko">⏰ Échéance dépassée</span>':"En cours"}</b><span class="mu">${d} / ${n} tâches · ${p} %</span></div>
+    <div class="bar"><i style="width:${p}%;background:${ach?"var(--ok)":pcc(p)}"></i></div>
+    ${g.tk.map((x,k)=>{const ov=!x.ok&&x.d&&x.d<td;return `<div class="ev ${x.ok?"past":""}" style="flex-wrap:wrap"><input type="checkbox" style="width:24px;height:24px" data-tc="${j},${k}" ${x.ok?"checked":""}><input style="flex:2;min-width:140px;${x.ok?"text-decoration:line-through;":""}" data-tf="${j},${k}" data-k="t" value="${esc(x.t)}"><input type="date" style="width:auto" data-tf="${j},${k}" data-k="d" value="${esc(x.d)}"><span style="min-width:96px">${x.ok?"✅ Fait"+(x.fd?" le "+fm(x.fd).slice(0,5):""):ov?'<span class="ko">❌ Pas fait (en retard)</span>':"⏳ À faire"}</span><button data-tx="${j},${k}">✕</button></div>`}).join("")||'<p class="mu">Aucune tâche : ajoutez la première ci-dessous.</p>'}
+    <div class="row" style="align-items:end;margin-top:8px"><label style="flex:2">Nouvelle tâche<input id="nt${j}" placeholder="Ce que je dois faire"></label><label>Date<input type="date" id="ntd${j}" value="${td}"></label><button class="p" data-ta="${j}" style="margin-bottom:10px">+ Tâche</button></div>
+    <button data-og-del="${j}">🗑 Supprimer l'objectif</button></div>`}).join("")}`;
+  const q=(s,f)=>$("main").querySelectorAll(s).forEach(f),sp=s=>s.split(",").map(Number);
+  $("tn").oninput=e=>{t.name=e.target.value;save();tabs()};
+  if($("dd"))$("dd").onclick=e=>{if(!e.target.dataset.ok){e.target.dataset.ok=1;e.target.textContent="Confirmer (objectifs et tâches supprimés) ?";return}S.pl=S.pl.filter(p=>p.m!==t.id);S.tabs.splice(i,1);S.cur="0";save();render()};
+  q("[data-v]",el=>el.oninput=()=>{t.v[el.dataset.v]=el.value;save()});
+  $("nga").onclick=()=>{const v=$("ng").value.trim();if(!v){$("ng").focus();return}t.og.push({id:"g"+Date.now(),t:v,d:$("ngd").value,tk:[]});save();dom(i)};
+  $("ng").onkeydown=e=>{if(e.key==="Enter")$("nga").click()};
+  q("[data-gf]",el=>{const g=t.og[+el.dataset.gf],k=el.dataset.k;el.oninput=()=>{g[k]=el.value;save()};if(el.type==="date")el.onchange=()=>{g[k]=el.value;save();dom(i)}});
+  q("[data-tf]",el=>{const [j,k]=sp(el.dataset.tf),x=t.og[j].tk[k],f=el.dataset.k;el.oninput=()=>{x[f]=el.value;save()};if(el.type==="date")el.onchange=()=>{x[f]=el.value;save();dom(i)}});
+  q("[data-tc]",el=>el.onchange=()=>{const [j,k]=sp(el.dataset.tc),x=t.og[j].tk[k];x.ok=el.checked;x.fd=el.checked?ld():"";save();dom(i)});
+  q("[data-ta]",b=>{const j=+b.dataset.ta;b.onclick=()=>{const v=$("nt"+j).value.trim();if(!v){$("nt"+j).focus();return}t.og[j].tk.push({t:v,d:$("ntd"+j).value,ok:false,fd:""});save();dom(i)};$("nt"+j).onkeydown=e=>{if(e.key==="Enter")b.click()}});
+  q("[data-tx]",b=>b.onclick=()=>{const [j,k]=sp(b.dataset.tx);t.og[j].tk.splice(k,1);save();dom(i)});
+  q("[data-og-del]",b=>b.onclick=()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent="Confirmer la suppression ?";return}t.og.splice(+b.dataset.ogDel,1);save();dom(i)});
+}
+
+function rep(){
+  $("main").innerHTML=`<div class="card" style="border-top:6px solid #7a8a99"><h2 style="color:#7a8a99">📄 Rapport de performance</h2><div class="row">${[[7,"7 jours"],[30,"30 jours"],[90,"90 jours"],[0,"Tout"]].map(x=>`<button data-p="${x[0]}" class="${RP===x[0]?"on":""}">${x[1]}</button>`).join("")}</div>
+   <pre id="rt" style="margin-top:10px">${esc(report(RP))}</pre><button class="p" id="rc">📋 Copier le rapport</button> <span class="mu">Collez-le dans une conversation avec Claude pour obtenir un plan d'action détaillé.</span></div>`;
+  $("main").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{RP=+b.dataset.p;rep()});
+  $("rc").onclick=()=>{try{navigator.clipboard.writeText($("rt").textContent).then(()=>{$("rc").textContent="✅ Copié"}).catch(()=>{})}catch(e){}const r=document.createRange();r.selectNodeContents($("rt"));const s=getSelection();s.removeAllRanges();s.addRange(r)};
+}
+const WH=["Téléphone / réseaux sociaux","Procrastination","Manque de plan","Interruptions","Fatigue","Distraction / rêverie","Tâches annexes","Démotivation","Autre"];
+let TD=ld();
+const dv=()=>({av:S.av||10,h:{},why:[],note:""}),rd=d=>S.tl[d]||dv(),wr=d=>(S.tl[d]=S.tl[d]||dv());
+const used=r=>Object.values(r.h).reduce((a,b)=>a+(+b||0),0);
+const hh=ms=>{const s=Math.floor(ms/1e3);return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(x=>String(x).padStart(2,"0")).join(":")};
+const nmd=id=>(S.tabs.find(t=>t.id===id)||{}).name||"?";
+function tstats(n){const o=[];for(let i=0;i<n;i++){const d=new Date(Date.now()-new Date().getTimezoneOffset()*6e4-i*864e5).toISOString().slice(0,10),r=S.tl[d];if(r)o.push({d,av:+r.av||0,u:used(r),r})}return o}
+function bars(st){
+  const a=st.slice().reverse().filter(x=>x.av||x.u);if(!a.length)return "";
+  const W=640,H=200,L=30,B=24,T0=10,mx=Math.max(...a.map(x=>Math.max(x.av,x.u)),1),Y=v=>T0+(H-T0-B)*(1-v/mx),bw=Math.min(36,(W-L)/a.length*.6);
+  let o=`<svg viewBox="0 0 ${W} ${H}">`;
+  a.forEach((x,i)=>{const cx=L+(W-L)*(i+.5)/a.length,lo=Math.max(0,x.av-x.u);
+    o+=`<rect x="${cx-bw/2}" y="${Y(x.u)}" width="${bw}" height="${Y(0)-Y(x.u)}" fill="var(--ok)" rx="2"/><rect x="${cx-bw/2}" y="${Y(x.u+lo)}" width="${bw}" height="${Y(x.u)-Y(x.u+lo)}" fill="var(--ko)" opacity=".45" rx="2"/><text x="${cx}" y="${H-8}" text-anchor="middle">${x.d.slice(8)}/${x.d.slice(5,7)}</text>`});
+  return o+`<line x1="${L}" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--mu)"/></svg><div class="leg"><span><i style="background:var(--ok)"></i>Temps productif</span><span><i style="background:var(--ko);opacity:.5"></i>Temps sans résultat</span></div>`;
+}
+function tmv(){
+  const r=rd(TD),u=used(r),lost=Math.max(0,(+r.av||0)-u),pct=r.av>0?Math.min(100,Math.round(u/r.av*100)):0,run=S.tm;
+  const all=tstats(14),st=all.filter(x=>x.u>0),why={},dm={};
+  st.forEach(x=>{x.r.why.forEach(w=>why[w]=(why[w]||0)+1);Object.entries(x.r.h).forEach(([k,v])=>dm[k]=(dm[k]||0)+(+v||0))});
+  const tot=st.reduce((a,x)=>a+x.u,0),ta=st.reduce((a,x)=>a+x.av,0),tl=st.reduce((a,x)=>a+Math.max(0,x.av-x.u),0),wl=Object.entries(why).sort((a,b)=>b[1]-a[1]),I=[];
+  if(st.length){
+    I.push(`⏱️ Sur ${st.length} jour(s) suivis : <b>${(tot/st.length).toFixed(1)} h</b> productives par jour, utilisation de votre temps <b>${ta?Math.round(tot/ta*100):0} %</b>.`);
+    I.push(`🕳️ Temps sans résultat : <b>${(tl/st.length).toFixed(1)} h/jour</b> en moyenne (une partie est normale : pauses, repas, trajets).`);
+    if(wl.length)I.push(`🚧 Cause n°1 du temps perdu : <b>${wl[0][0]}</b> (${wl[0][1]} jour(s) sur ${st.length}).`);
+    const ng=S.tabs.filter(t=>!dm[t.id]);if(ng.length)I.push(`⚠️ Aucune heure en 14 jours dans : ${ng.map(t=>esc(t.name)).join(", ")}.`);
+    const bd=[...st].sort((a,b)=>b.u-a.u)[0];I.push(`🏆 Meilleur jour : ${fm(bd.d)} (${bd.u.toFixed(1)} h).`);
+  }else I.push("Lancez le chronomètre ou saisissez vos heures du jour pour voir l'analyse.");
+  const dl=Object.entries(dm).sort((a,b)=>b[1]-a[1]),mxd=dl.length?dl[0][1]:1;
+  $("main").innerHTML=`<div class="card"><h2>⏱️ Chronomètre</h2>${run?`<div class="ins">En cours : <b>${esc(nmd(run.id))}</b> — <b id="tt">${hh(Date.now()-run.s)}</b></div><button class="p" id="tstop">⏹ Arrêter et enregistrer</button>`:`<p class="mu">Lancez-le quand vous commencez à travailler : le temps s'ajoute à votre journée (même si vous fermez la page).</p><div class="row">${S.tabs.map(t=>`<button data-ts="${t.id}">▶ ${esc(t.name)}</button>`).join("")}</div>`}</div>
+  <div class="card"><h2>📅 Ma journée</h2><div class="row"><label>Date<input type="date" id="td" value="${TD}"></label><label>Heures disponibles (ma fenêtre de travail)<input type="number" step="0.5" min="0" id="tav" value="${r.av}"></label></div>
+   <div class="row">${S.tabs.map((t,i)=>`<label style="color:${COL[i]}">${esc(t.name)} (h)<input type="number" step="0.25" min="0" data-th="${t.id}" value="${r.h[t.id]||""}"></label>`).join("")}</div>
+   <div class="g"><div><small>Temps productif</small><b class="ok">${u.toFixed(1)} h</b></div><div><small>Utilisation</small><b>${pct} %</b></div><div><small>Temps sans résultat</small><b class="${lost>2?"ko":"wa"}">${lost.toFixed(1)} h</b></div></div><div class="bar"><i style="width:${pct}%;background:${pcc(pct)}"></i></div>
+   <h2 style="margin-top:12px">Pourquoi le temps a filé ? (cochez)</h2><div class="row">${WH.map(w=>`<label class="ck"><input type="checkbox" data-tw value="${w}" ${r.why.includes(w)?"checked":""}> ${w}</label>`).join("")}</div>
+   <label style="margin-top:10px">Ce qui s'est passé<textarea id="tnote">${esc(r.note)}</textarea></label></div>
+  <div class="card"><h2>🔬 Analyse de mon temps (14 jours)</h2>${I.map(x=>`<div class="ins">${x}</div>`).join("")}${bars(all)}
+   ${dl.length?`<h2 style="margin-top:12px">Répartition par domaine</h2>${dl.map(([k,v])=>`<div style="display:flex;justify-content:space-between;font-size:14px"><span>${esc(nmd(k))}</span><b>${v.toFixed(1)} h</b></div><div class="bar"><i style="width:${v/mxd*100}%;background:var(--ac)"></i></div>`).join("")}`:""}</div>`;
+  const q=(s,f)=>$("main").querySelectorAll(s).forEach(f);
+  q("[data-ts]",b=>b.onclick=()=>{S.tm={id:b.dataset.ts,s:Date.now()};save();tmv()});
+  if($("tstop"))$("tstop").onclick=()=>{const h=(Date.now()-S.tm.s)/36e5,d=wr(ld());d.h[S.tm.id]=Math.round(((+d.h[S.tm.id]||0)+h)*100)/100;S.tm=null;TD=ld();save();tmv()};
+  $("td").onchange=e=>{TD=e.target.value||ld();tmv()};
+  $("tav").onchange=e=>{const v=parseFloat(e.target.value)||0;wr(TD).av=v;S.av=v;save();tmv()};
+  q("[data-th]",el=>el.onchange=()=>{wr(TD).h[el.dataset.th]=parseFloat(el.value)||0;save();tmv()});
+  q("[data-tw]",el=>el.onchange=()=>{wr(TD).why=[...$("main").querySelectorAll("[data-tw]:checked")].map(x=>x.value);save();tmv()});
+  $("tnote").onchange=e=>{wr(TD).note=e.target.value;save()};
+}
+setInterval(()=>{const e=$("tt");if(e&&S.tm)e.textContent=hh(Date.now()-S.tm.s)},1000);
+let JD=ld();
+const autoTxt=(t,d)=>{const p=[],r=S.tl[d],h=r&&r.h[t.id];if(h)p.push(`${Math.round(+h*100)/100} h enregistrées (chronomètre ou saisie)`);t.k.forEach(k=>(k.log||[]).filter(l=>l.d===d).forEach(l=>p.push(`KPI ${k.n||"sans nom"} : ${l.v} ${k.u||""}`)));const m=t.e.filter(x=>x.d===d).length;if(m>1)p.push(`${m} bilans ce jour`);return p.join(" · ")};
+const auto=(t,d)=>{const s=autoTxt(t,d);return s?`<p class="mu">⚙️ Reporté automatiquement : ${esc(s)}</p>`:""};
+const hrs=(t,d)=>{const r=S.tl[d],v=r&&r.h[t.id];if(v!=null&&v!=="")return +v;const e=t.e.find(x=>x.d===d);return e?(+e.h||0):0};
+function verdict(t,d){
+  const e=t.e.find(x=>x.d===d);if(!e)return "";
+  const h=hrs(t,d),s=+e.sc,o=t.e.filter(x=>x.d!==d&&Math.abs(Date.parse(d)-Date.parse(x.d))<=7*864e5),hv=o.length>0,bh=avg(o.map(x=>hrs(t,x.d))),bs=avg(o.map(x=>+x.sc)),hi=hv?h>=bh:h>=2,ps=s>=6;
+  const m=hi&&ps?"🏆 Journée solide : du temps ET des résultats.":hi?"🕳️ Beaucoup d'heures mais peu de résultats : le temps a filé. Cause probable : concentration ou méthode (voir les causes cochées).":ps?"⚡ Efficace mais peu de temps : augmentez la durée pour progresser plus vite.":"⚠️ Journée faible : peu d'heures et peu de résultats.";
+  const s30=stats(t,30),top=s30?Object.entries(s30.ob).sort((x,y)=>y[1]-x[1])[0]:null;
+  return `<b>${m}</b><br>Heures : ${h} h${hv?` (moyenne 7 j : ${bh.toFixed(1)} h)`:""} · Productivité : ${s}/10${hv?` (moyenne : ${bs.toFixed(1)})`:""}<br>Causes du jour : ${(e.ob||[]).join(", ")||"—"}${top?` · Obstacle n°1 sur 30 jours : ${top[0]} (${top[1]}×)`:""}`;
+}
+function dayReport(d){
+  const L=[`RAPPORT QUOTIDIEN — ${fm(d)}`,""];let th=0;
+  S.tabs.forEach(t=>{const e=t.e.find(x=>x.d===d);L.push(`## ${t.name}`);const au=autoTxt(t,d);if(au)L.push("Automatique : "+au);if(!e){L.push("Pas de rapport.","");return}
+    const h=hrs(t,d);th+=h;L.push(`Heures : ${h} h · Productivité : ${e.sc}/10 · Énergie : ${e.en}/5`);
+    if(e.a)L.push("Accompli : "+e.a);
+    if((e.ob||[]).length||e.b)L.push("Causes d'échec / obstacles : "+[(e.ob||[]).join(", "),e.b].filter(Boolean).join(" — "));
+    if(e.n)L.push("Prochaine action : "+e.n);
+    L.push("Analyse : "+verdict(t,d).replace(/<br>/g," | ").replace(/<[^>]+>/g,""));L.push("")});
+  const r=S.tl[d];if(r&&r.why.length)L.push("Causes du temps perdu (journée) : "+r.why.join(", "));
+  const ck=S.ci.filter(x=>x.d===d).map(x=>x.m+" (énergie "+x.en+"/5)").join(", ");if(ck)L.push("Ressenti du jour : "+ck);
+  const hk=S.pl.filter(p=>p.k==="c"&&(p.d==7||p.d==dow(d)));if(hk.length)L.push("Tâches à cocher : "+hk.map(p=>(isDone(p.id,d)?"✅ ":"❌ ")+p.t).join(", "));
+  const dd=S.dc.filter(x=>x.d===d);if(dd.length){L.push("Décisions du jour :");dd.forEach(x=>L.push("- "+x.t+(x.m?" ("+nmd(x.m)+")":"")+" — à évaluer le "+fm(x.ev)+(x.r?" — résultat : "+RES[x.r][0].replace(/^\S+ /,"")+(x.rn?" ("+x.rn+")":""):"")))}
+  const e2=S.dc.filter(x=>x.rd===d);if(e2.length){L.push("Évaluations faites ce jour :");e2.forEach(x=>L.push("- "+x.t+" → "+RES[x.r][0].replace(/^\S+ /,"")+(x.rn?" ("+x.rn+")":"")))}
+  const pt=S.tabs.map(t=>({n:t.name,p:plH(t,d),h:hrs(t,d)})).filter(x=>x.p>0);if(pt.length)L.push("Planning (réalisé/prévu) : "+pt.map(x=>`${x.n} ${x.h.toFixed(1)}/${x.p.toFixed(1)} h`).join(", "));
+  L.push(`Total heures : ${th.toFixed(1)} h`);return L.join("\n");
+}
+function sumj(){
+  let th=0,sc=[],miss=[];
+  S.tabs.forEach(t=>{const e=t.e.find(x=>x.d===JD);if(e){th+=hrs(t,JD);sc.push(+e.sc)}else miss.push(t.name)});
+  const r=S.tl[JD],w=r&&r.why.length?r.why.join(", "):"—",ck=S.ci.filter(x=>x.d===JD).map(x=>x.m+" (énergie "+x.en+"/5)").join(", ");
+  $("jsum").innerHTML=`<div class="g"><div><small>Total heures</small><b>${th.toFixed(1)} h</b></div><div><small>Productivité moyenne</small><b style="color:${sc.length?scc(avg(sc)):"var(--mu)"}">${sc.length?avg(sc).toFixed(1)+"/10":"—"}</b></div><div><small>Rapports faits</small><b>${sc.length}/${S.tabs.length}</b></div></div>${miss.length?`<div class="ins">📝 Pas encore de rapport : ${miss.map(esc).join(", ")}</div>`:""}<div class="ins">🚧 Causes du temps perdu (journée) : ${esc(w)}</div>${ck?`<div class="ins">💭 Ressenti du jour : ${esc(ck)}</div>`:""}${S.dc.some(x=>!x.r&&x.ev<=ld())?`<div class="ins">⏳ Des décisions attendent votre évaluation (voir en bas de page).</div>`:""}`;
+  $("jr").textContent=dayReport(JD);
+}
+function jour(){
+  $("main").innerHTML=`<div class="card"><h2>📆 Rapport quotidien par domaine</h2><label>Date<input type="date" id="jd" value="${JD}"></label><div id="jsum"></div><button id="gd2" style="margin:8px 0">🧩 Aller aux décisions & à leur évaluation ↓</button><details><summary>Voir / copier le rapport du jour</summary><pre id="jr" style="margin-top:8px"></pre><button class="p" id="jc">📋 Copier</button></details></div>
+  ${S.tabs.map((t,i)=>{const e=t.e.find(x=>x.d===JD),h=hrs(t,JD);return `<div class="card" style="border-top:4px solid ${COL[i]}"><h2 style="color:${COL[i]}">${esc(t.name)}</h2>${auto(t,JD)}
+   <div class="row"><label>Heures travaillées<input type="number" step="0.25" min="0" id="jh${i}" value="${h||""}"></label>
+   <label>Productivité : <b id="jso${i}">${e?e.sc:5}</b>/10<input type="range" id="js${i}" min="0" max="10" step="0.5" value="${e?e.sc:5}"></label>
+   <label>Énergie : <b id="jeo${i}">${e?e.en:3}</b>/5<input type="range" id="je${i}" min="1" max="5" value="${e?e.en:3}"></label></div>
+   <label>Ce que j'ai accompli<textarea id="ja${i}">${esc(e?e.a:"")}</textarea></label>
+   <label>Causes d'échec / ce qui m'a freiné</label><div class="row" style="margin:-4px 0 8px">${OB.map(o=>`<label class="ck"><input type="checkbox" data-jo="${i}" value="${o}" ${e&&(e.ob||[]).includes(o)?"checked":""}> ${o}</label>`).join("")}</div>
+   <label>Détails (pourquoi ça n'a pas marché)<textarea id="jb${i}">${esc(e?e.b:"")}</textarea></label>
+   <label>Prochaine action<textarea id="jn${i}">${esc(e?e.n:"")}</textarea></label>
+   <button class="p" data-js="${i}">💾 Enregistrer le rapport</button> <span class="mu" id="jm${i}"></span>
+   <div class="ins" id="v${i}" style="${e?"":"display:none;"}margin-top:10px">${e?verdict(t,JD):""}</div></div>`}).join("")}<div id="dcs"></div>`;
+  decR();
+  $("gd2").onclick=()=>$("dcs").scrollIntoView({behavior:"smooth"});
+  $("jd").onchange=e=>{JD=e.target.value||ld();jour()};
+  $("jc").onclick=()=>{try{navigator.clipboard.writeText($("jr").textContent).then(()=>{$("jc").textContent="✅ Copié"}).catch(()=>{})}catch(e){}const g=document.createRange();g.selectNodeContents($("jr"));const s=getSelection();s.removeAllRanges();s.addRange(g)};
+  S.tabs.forEach((t,i)=>{$("js"+i).oninput=e=>{$("jso"+i).textContent=e.target.value};$("je"+i).oninput=e=>{$("jeo"+i).textContent=e.target.value}});
+  $("main").querySelectorAll("[data-js]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.js,t=S.tabs[i],h=parseFloat($("jh"+i).value)||0,ob=[...$("main").querySelectorAll(`[data-jo="${i}"]:checked`)].map(x=>x.value),a=$("ja"+i).value.trim(),bb=$("jb"+i).value.trim(),n=$("jn"+i).value.trim();
+    if(!h&&!a&&!bb&&!n&&!ob.length){$("jm"+i).textContent="⚠️ Renseignez au moins les heures ou une note";return}
+    const ex=t.e.find(x=>x.d===JD),o={id:ex?ex.id:Date.now()+"-"+i,d:JD,sc:+$("js"+i).value,en:+$("je"+i).value,m:ex?ex.m:"",h:String(h),a,b:bb,n,ob};
+    if(ex)t.e[t.e.indexOf(ex)]=o;else t.e.push(o);
+    wr(JD).h[t.id]=h;save();
+    $("v"+i).style.display="";$("v"+i).innerHTML=verdict(t,JD);$("jm"+i).textContent="✅ Enregistré";sumj();
+  });
+  sumj();
+}
+function render(){tabs();S.cur==="o"?over():S.cur==="r"?rep():S.cur==="t"?tmv():S.cur==="j"?jour():S.cur==="p"?plan():S.cur==="g"?obj():S.cur==="d"?decv():dom(+S.cur)}
+const pmin=h=>{const [a,b]=h.split(":").map(Number);return a*60+b};
+const DFR=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"],DS=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+const dow=d=>new Date(Date.parse(d)).getUTCDay();
+const plH=(t,d)=>S.pl.filter(p=>p.m===t.id&&(p.d==7||p.d==dow(d))&&!(p.ex&&p.ex.includes(d))).reduce((a,p)=>a+(pmin(p.e)-pmin(p.s))/60,0);
+function ring(m){
+  const c=$("toasts"),d=document.createElement("div");d.className="ins";d.innerHTML=m+" ";
+  const b=document.createElement("button");b.textContent="OK";b.onclick=()=>d.remove();d.appendChild(b);c.appendChild(d);
+  try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+  try{const a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();setTimeout(()=>{o.stop();a.close()},350)}catch(e){}
+  try{if("Notification" in window&&Notification.permission==="granted")new Notification("Mon analyste",{body:m.replace(/<[^>]+>/g,"")})}catch(e){}
+}
+function pstat(){const e=$("pst");if(e)e.textContent=("Notification" in window&&Notification.permission==="granted")?"Notifications activées ✅":"Alertes dans la page (bannière + son)"}
+function ptick(){
+  const n=new Date(),ds=ld(),w=n.getDay(),nm=n.getHours()*60+n.getMinutes();
+  if(S.fd!==ds){S.fd=ds;S.fired={};save()}
+  S.pl.forEach(p=>{if(p.d!=7&&p.d!=w)return;if(p.ud&&ds>p.ud)return;if(p.ex&&p.ex.includes(ds))return;if(p.dt&&p.dt!==ds)return;const st=pmin(p.s),r=+p.r;
+    [[st-r,"p"],[st,"s"]].forEach(([at,ty])=>{if(ty==="p"&&!r)return;const k=p.id+ty;
+      if(nm>=at&&nm<at+5&&!S.fired[k]){S.fired[k]=1;save();ring(ty==="p"?`⏰ Dans ${r} min : <b>${esc(p.t)}</b>`:(p.k==="c"?`▶️ C'est l'heure : <b>${esc(p.t)}</b> — cochez-la quand c'est fait ✅`:`▶️ C'est l'heure : <b>${esc(p.t)}</b> (${p.s}–${p.e}) — pensez à lancer le chronomètre`))}})});
+  const f=document.activeElement;if(S.cur==="p"&&!window.PDIRTY&&!(f&&/INPUT|TEXTAREA|SELECT/.test(f.tagName)))plan();
+}
+let PE=null;
+function plan(){
+  window.PDIRTY=false;
+  const td=ld(),nowD=new Date(),nm=nowD.getHours()*60+nowD.getMinutes(),tz=nowD.getTimezoneOffset()*6e4;
+  const addD=(d,n)=>new Date(Date.parse(d)+n*864e5).toISOString().slice(0,10);
+  const P=S.pl.map((p,i)=>{const ms=parseInt(p.id);return {...p,i,cd:isNaN(ms)?"":new Date(ms-tz).toISOString().slice(0,10)}});
+  const srt=(a,b)=>a.s<b.s?-1:a.s>b.s?1:0,at=d=>P.filter(p=>(p.dt?p.dt===d:(p.d==7||p.d==dow(d)))&&(p.dt||p.all||!p.cd||d>=p.cd)&&(!p.ud||d<=p.ud)&&!(p.ex&&p.ex.includes(d))).sort(srt);
+  const WC=["#c2478c","#2f5fa8","#0f9aa8","#2f9e6e","#d99a1c","#e8743b","#a04bb8"];
+  S.cl=S.cl||{};S.wk=S.wk||{};if(!S.ws)S.ws=td;if(!S.ac)S.ac=td;
+  const scoreOf=(L,d)=>{const c=L.filter(p=>p.core),o=L.filter(p=>!p.core),f=a=>a.filter(p=>isDone(p.id,d)).length/a.length;
+    if(!c.length)return Math.round(f(o)*100);
+    return Math.round(f(c)*90+(o.length?f(o)*10:0))};
+  const dayPct=d=>{if(S.cl[d]!=null)return S.cl[d];const L=at(d);return L.length?scoreOf(L,d):null};
+  const weekPct=w=>{const v=[0,1,2,3,4,5,6].map(k=>dayPct(addD(w,k))).filter(x=>x!=null);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null};
+  let moved=false;
+  for(let k=0;k<7;k++){const d=addD(S.ws,k);if(d<td&&d>=S.ac&&S.cl[d]==null){const q=dayPct(d);if(q!=null)S.cl[d]=q}}
+  while(td>addD(S.ws,6)){for(let k=0;k<7;k++){const d=addD(S.ws,k);if(S.cl[d]==null){const p=dayPct(d);if(p!=null)S.cl[d]=p}}S.wk[S.ws]=weekPct(S.ws);S.ws=addD(S.ws,7);moved=true}
+  save();
+  const chips=a=>`<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><span class="sc" style="background:var(--ok)">✅ Respecté ${a} %</span><span class="sc" style="background:var(--ko)">❌ Non respecté ${100-a} %</span></div><div class="bar" style="display:flex"><i style="width:${a}%;background:var(--ok);border-radius:0"></i><i style="width:${100-a}%;background:var(--ko);border-radius:0"></i></div>`;
+  const editRow=(p,ix)=>`<div class="ev" style="flex-wrap:wrap;border-inline-start:6px solid ${COL[ix]};background:color-mix(in srgb,${COL[ix]} 11%,var(--card))"><b style="flex:1;min-width:140px">${esc(p.t)}</b>${p.dt?`<label style="margin:0">Date<input type="date" id="edt" value="${p.dt}"></label>`:`<label style="margin:0">Jour<select id="eday"><option value="7" ${p.d==7?"selected":""}>Tous les jours</option>${[1,2,3,4,5,6,0].map(d=>`<option value="${d}" ${p.d==d?"selected":""}>${DFR[d]}</option>`).join("")}</select></label>`}<label style="margin:0">Début<input type="time" id="est" value="${p.s}"></label><label style="margin:0">Fin<input type="time" id="een" value="${p.k==="c"?"":p.e}"></label><button class="p" data-psave="${p.id}">💾 Enregistrer</button><button data-pcancel="1">Annuler</button></div>`;
+  const addForm=d=>`<div class="row" style="align-items:end;margin-top:10px;border-top:1px dashed var(--bd);padding-top:10px"><label style="flex:2">➕ Nouvelle tâche (tous les jours par défaut)<input id="nt-${d}" data-nt="${d}" placeholder="Ce que je dois faire"></label><label>Début<input type="time" id="ns-${d}" value="09:00"></label><label>Fin (facultatif)<input type="time" id="ne-${d}"></label><label>Domaine<select id="nm-${d}">${S.tabs.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("")}</select></label><label class="ck" style="margin-bottom:10px"><input type="checkbox" id="nr-${d}" checked> 🔁 tous les jours</label><button class="p" data-addday="${d}" style="margin-bottom:10px">+ Ajouter</button></div>`;
+  const card=d=>{
+    const L=at(d),dn=L.filter(p=>isDone(p.id,d)).length,isT=d===td,X=WC[dow(d)];
+    return `<div class="card" style="border-top:6px solid ${X};background:color-mix(in srgb,${X} 7%,var(--card));${isT?"outline:2px solid "+X+";":""}"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><h2 style="margin:0;color:${X}">${DFR[dow(d)]} ${fm(d).slice(0,5)}${isT?" · Aujourd'hui":""}</h2><span class="mu">${L.length?dn+" / "+L.length+" faites":"—"}</span></div>
+    ${L.length&&(isT||d<td)?chips(scoreOf(L,d)):""}${d<td?`<button class="p" data-close="${d}" style="margin:6px 0">✔ Valider cette journée</button>`:""}
+    ${L.map(p=>{const x=isDone(p.id,d),late=!x&&(d<td||(d===td&&pmin(p.e)<nm)),cls=x?"past":(isT&&pmin(p.s)<=nm&&pmin(p.e)>nm?"now":""),ix=Math.max(0,S.tabs.findIndex(t=>t.id===p.m));
+     if(PE===p.id)return editRow(p,ix);
+     return `<div class="ev ${cls}" style="flex-wrap:wrap;border-inline-start:6px solid ${COL[ix]};background:color-mix(in srgb,${COL[ix]} ${x?4:11}%,var(--card));${cls==="now"?"box-shadow:0 0 0 2px var(--ac);":""}"><time>${p.k==="c"?p.s:p.s+"–"+p.e}</time><span style="flex:1;min-width:140px">${esc(p.t)} <span class="mu" style="color:${COL[ix]}">· ${esc(nmd(p.m))}${p.dt?"":" · 🔁"}</span></span><button data-ck="${p.id}|${d}" style="${x?"background:var(--ok);border-color:var(--ok);color:#fff":late?"border-color:var(--ko);color:var(--ko)":""}">${x?"✅ Fait":late?"❌ Pas fait":"☐ À faire"}</button><b data-pedit="${p.id}" title="Modifier le jour ou l'heure" style="cursor:pointer">✏️</b>${p.dt?`<b data-pdel="${p.i}" title="Supprimer" style="cursor:pointer;color:var(--ko)">✕</b>`:`<b data-pdx="${p.i}|${d}" title="Retirer de ce jour seulement" style="cursor:pointer;color:var(--ko)">✕ ce jour</b><b data-pdel="${p.i}" title="Supprimer de tous les jours" style="cursor:pointer;color:var(--ko)">🗑 partout</b>`}</div>`}).join("")||'<p class="mu">Rien de prévu ce jour.</p>'}${addForm(d)}</div>`};
+  const line=d=>{const a=S.cl[d],X=WC[dow(d)];return `<div class="card" style="padding:10px 14px;border-inline-start:6px solid ${X};display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b style="color:${X}">${DFR[dow(d)]} ${fm(d).slice(0,5)}</b><span><b class="ok">✅ ${a} % respecté</b> · <b class="ko">❌ ${100-a} % non respecté</b></span></div>`};
+  const wd=[0,1,2,3,4,5,6].map(k=>addD(S.ws,k)),wp=weekPct(S.ws),oldW=Object.keys(S.wk).filter(w=>S.wk[w]!=null).sort().reverse();
+  $("main").innerHTML=`
+  <div class="card" style="border-top:6px solid #4f5bd5;background:color-mix(in srgb,#4f5bd5 9%,var(--card))"><h2 style="color:#4f5bd5">📅 Semaine du ${fm(wd[0]).slice(0,5)} au ${fm(wd[6]).slice(0,5)}</h2>
+   ${wp!=null?`<p class="mu" style="margin:0">Respect de la semaine jusqu'ici (jours validés + jour en cours)</p>${chips(wp)}`:'<p class="mu" style="margin:0">Aucune activité prévue cette semaine : ajoutez-en ci-dessus.</p>'}
+   <p class="mu" style="margin:6px 0 0">Cochez vos tâches pendant la journée : à minuit, ses tâches disparaissent automatiquement et il ne reste que la date et le pourcentage de tâches faites. À la fin de la semaine, une nouvelle semaine commence.</p><p class="mu" style="margin:6px 0 0">⚖️ Barème : les 3 tâches de base (français, anglais, formation) valent <b>90 %</b> de la journée ; les tâches que vous ajoutez vous-même se partagent les <b>10 %</b> restants.</p></div>
+  ${wd.map(d=>S.cl[d]!=null?line(d):card(d)).join("")}
+  <div class="card" style="border-top:6px solid #7a8a99"><h2 style="color:#7a8a99">📜 Semaines passées</h2>${oldW.length?oldW.map(w=>{const a=S.wk[w];return `<div class="en" style="border-inline-start:6px solid #7a8a99;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>Semaine du ${fm(w).slice(0,5)} au ${fm(addD(w,6)).slice(0,5)}</b><span><b class="ok">✅ ${a} % respecté</b> · <b class="ko">❌ ${100-a} % non respecté</b></span></div>`}).join(""):'<p class="mu">Aucune semaine terminée pour le moment.</p>'}</div>
+  <div class="card" style="border-top:6px solid #7a8a99"><h2 style="color:#7a8a99">💾 Sauvegarde / transfert de mes données</h2><p class="mu">Copiez vos données ici, puis collez-les dans un autre navigateur ou une autre version du fichier pour retrouver toutes vos tâches.</p><button id="bx">📋 Copier mes données</button><label style="margin-top:10px">Coller des données à importer<textarea id="bi" placeholder="Collez ici les données copiées"></textarea></label><button class="p" id="bim">⬇ Importer (remplace les données actuelles)</button> <span class="mu" id="bmsg"></span></div>`;
+  $("main").oninput=$("main").onchange=()=>{window.PDIRTY=true};if(PE)window.PDIRTY=true;
+  
+  $("main").querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{const d=b.dataset.close;S.cl[d]=dayPct(d)||0;save();plan()});
+  $("main").querySelectorAll("[data-pedit]").forEach(b=>b.onclick=()=>{PE=b.dataset.pedit;plan()});
+  $("main").querySelectorAll("[data-pcancel]").forEach(b=>b.onclick=()=>{PE=null;plan()});
+  $("main").querySelectorAll("[data-psave]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.psave,p=S.pl.find(x=>x.id===id),s=$("est").value,e=$("een").value,dd=$("eday")?+$("eday").value:0;
+    if(!p||!s){ring("⚠️ Renseignez l'heure de début");return}
+    if(e&&e<=s){ring("⚠️ L'heure de fin doit être après le début");return}
+    const ms=parseInt(p.id),cd=isNaN(ms)?"":new Date(ms-tz).toISOString().slice(0,10);
+    if(p.dt){const n2=$("edt").value||p.dt;p.dt=n2;p.d=dow(n2);p.s=s;p.e=e||s;p.k=e?"t":"c"}else if(cd&&cd>=td){p.d=dd;p.s=s;p.e=e||s;p.k=e?"t":"c"}
+    else{p.ud=nd(-1);const n={...p,id:Date.now()+"-"+Math.random(),d:dd,s,e:e||s,k:e?"t":"c"};delete n.ud;delete n.all;S.pl.push(n);const c=S.ck[td];if(c&&c[id]){c[n.id]=1;delete c[id]}}
+    PE=null;save();plan()});
+  const addDay=d=>{const t=$("nt-"+d).value.trim(),s=$("ns-"+d).value,e=$("ne-"+d).value;
+    if(!t||!s){ring("⚠️ Renseignez la tâche et l'heure de début");return}
+    if(e&&e<=s){ring("⚠️ L'heure de fin doit être après le début");return}
+    const o={id:Date.now()+"-"+Math.random(),t,d:$("nr-"+d).checked?7:dow(d),s,e:e||s,k:e?"t":"c",r:10,m:$("nm-"+d).value};if(!$("nr-"+d).checked)o.dt=d;else o.all=1;
+    S.pl.push(o);save();plan()};
+  $("main").querySelectorAll("[data-addday]").forEach(b=>b.onclick=()=>addDay(b.dataset.addday));
+  $("main").querySelectorAll("[data-nt]").forEach(el=>el.onkeydown=ev=>{if(ev.key==="Enter")addDay(el.dataset.nt)});
+
+  $("main").querySelectorAll("[data-ck]").forEach(b=>b.onclick=()=>{const [id,d]=b.dataset.ck.split("|"),o=S.ck[d]=S.ck[d]||{};if(o[id])delete o[id];else o[id]=1;save();plan()});
+  $("main").querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent="Supprimer ?";return}const p=S.pl[+b.dataset.pdel],ms=parseInt(p.id),cd=isNaN(ms)?"":new Date(ms-tz).toISOString().slice(0,10);if(p.dt||(cd&&cd>=td))S.pl.splice(+b.dataset.pdel,1);else p.ud=addD(S.ws,-1);save();plan()});
+  $("main").querySelectorAll("[data-pdx]").forEach(b=>b.onclick=()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent="Retirer ?";return}const [i,d]=b.dataset.pdx.split("|"),p=S.pl[+i];(p.ex=p.ex||[]).push(d);save();plan()});
+  $("bx").onclick=()=>{const t=localStorage.getItem(KEY)||JSON.stringify(S);$("bi").value=t;$("bi").select();try{navigator.clipboard.writeText(t).then(()=>{$("bmsg").textContent="✅ Copié"}).catch(()=>{$("bmsg").textContent="Texte sélectionné : copiez-le manuellement"})}catch(e){$("bmsg").textContent="Texte sélectionné : copiez-le manuellement"}};
+  $("bim").onclick=()=>{let o;try{o=JSON.parse($("bi").value)}catch(e){}if(!o||!Array.isArray(o.tabs)){$("bmsg").textContent="⚠️ Données invalides";return}if(!$("bim").dataset.ok){$("bim").dataset.ok=1;$("bmsg").textContent="Cliquez encore pour confirmer le remplacement";return}try{localStorage.setItem(KEY,$("bi").value);location.reload()}catch(e){$("bmsg").textContent="⚠️ Échec de l'import"}};
+  pstat();
+}
+
+setInterval(ptick,15000);document.addEventListener("visibilitychange",ptick);setTimeout(ptick,0);
+const DCC=x=>x.m?COL[Math.max(0,S.tabs.findIndex(t=>t.id===x.m))]:"#7a8a99";
+const RES={ok:["✅ Efficace","var(--ok)"],part:["🟡 Partiellement efficace","var(--wa)"],ko:["❌ Inefficace","var(--ko)"]};
+const nd=n=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4+n*864e5).toISOString().slice(0,10);
+function decR(){
+  const td=ld(),isEv=x=>!!x.rd,effv=x=>x.p!=null&&x.p!==""?+x.p:x.r==="ok"?100:x.r==="part"?50:0;
+  const pend=S.dc.filter(x=>!isEv(x)).sort((a,b)=>(a.ev||"9")<(b.ev||"9")?-1:1),dn=S.dc.filter(isEv).sort((a,b)=>a.rd<b.rd?1:-1);
+  const ec=v=>v>=70?"var(--ok)":v>=40?"var(--wa)":"var(--ko)",avg2=dn.length?Math.round(dn.reduce((s,x)=>s+effv(x),0)/dn.length):0;
+  const dm=x=>x.m?esc(nmd(x.m)):"Général";
+  $("dcs").innerHTML=`<div class="card" style="border-top:6px solid #e8743b;background:color-mix(in srgb,#e8743b 9%,var(--card))"><h2 style="color:#e8743b">🧩 Nouvelle décision</h2>
+  <div class="row"><label style="flex:2">Décision<input id="dct" placeholder="Ex. : couper le téléphone pendant la thèse"></label><label>Domaine<select id="dcm"><option value="">Général</option>${S.tabs.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("")}</select></label></div>
+  <div class="row"><label>Début d'application<input type="date" id="dcb" value="${td}"></label><label>Date d'évaluation<input type="date" id="dce" value="${nd(3)}"></label></div>
+  <button class="p" id="dca">+ Ajouter la décision</button> <span class="mu" id="dcg"></span></div>
+  <div class="card" style="border-top:6px solid #d4472b;background:color-mix(in srgb,#d4472b 8%,var(--card))"><h2 style="color:#d4472b">⏳ Décisions en cours (${pend.length})</h2>
+  ${pend.map(x=>{const due=x.ev&&x.ev<=td;return `<div class="en" style="border-inline-start:6px solid ${DCC(x)};background:color-mix(in srgb,${DCC(x)} 7%,var(--card))"><div class="h"><b>${esc(x.t)}</b><span class="mu" style="color:${DCC(x)}">${dm(x)}</span></div><p class="mu" style="margin:2px 0">Début : ${x.d?fm(x.d):"—"} · Évaluation : ${x.ev?fm(x.ev):"—"} ${due?'<b class="ko">⏰ à évaluer</b>':""}</p>
+   <div class="row" style="align-items:end"><label>Efficacité<select id="ef${x.id}"><option value="">— %</option>${[0,10,20,30,40,50,60,70,80,90,100].map(v=>`<option value="${v}">${v} %</option>`).join("")}</select></label><button class="p" data-ev="${x.id}" style="margin-bottom:10px">Évaluer</button><button data-dx="${x.id}" style="margin-bottom:10px">Supprimer</button></div></div>`}).join("")||'<p class="mu">Aucune décision en cours.</p>'}</div>
+  <div class="card" style="border-top:6px solid #2f9e6e;background:color-mix(in srgb,#2f9e6e 8%,var(--card))"><h2 style="color:#2f9e6e">✅ Décisions évaluées (${dn.length})</h2>
+  ${dn.length?`<div class="ins">📊 Efficacité moyenne : <b>${avg2} %</b></div>`:""}
+  ${dn.map(x=>{const v=effv(x);return `<div class="en" style="border-inline-start:6px solid ${DCC(x)}"><div class="h"><b>${esc(x.t)}</b><span class="sc" style="background:${ec(v)}">${v} %</span></div><div class="bar"><i style="width:${v}%;background:${ec(v)}"></i></div><p class="mu" style="margin:2px 0">${dm(x)} · ${x.d?fm(x.d):"—"} → ${fm(x.rd)}</p><button data-dx="${x.id}">Supprimer</button></div>`}).join("")||'<p class="mu">Aucune évaluation pour le moment.</p>'}</div>`;
+  $("dca").onclick=()=>{const t=$("dct").value.trim();if(!t){$("dcg").textContent="⚠️ Écrivez la décision";return}S.dc.push({id:String(Date.now()),d:$("dcb").value||td,t,m:$("dcm").value,ev:$("dce").value||nd(3),r:"",p:"",rn:"",rd:""});save();decR()};
+  const q=(s,f)=>$("dcs").querySelectorAll(s).forEach(f);
+  q("[data-dx]",b=>b.onclick=()=>{S.dc=S.dc.filter(x=>x.id!==b.dataset.dx);save();decR()});
+  q("[data-ev]",b=>b.onclick=()=>{const id=b.dataset.ev,v=$("ef"+id).value;if(v===""){b.textContent="Choisissez un %";return}const x=S.dc.find(y=>y.id===id);x.p=+v;x.r="p";x.rd=td;save();decR()});
+}
+let GC=0;
+const gday=s=>new Date(s+"T00:00:00Z").getTime(),GD=864e5;
+const gdone=(g,dt)=>(g.log||[]).filter(l=>l.date<=dt).reduce((a,l)=>a+(+l.hrs||0),0);
+const gfm=ts=>fm(new Date(ts).toISOString().slice(0,10));
+function gcalc(g){
+  const h=+g.h||0,T0=ld();
+  if(!g.s||!g.d||!h||gday(g.d)<=gday(g.s))return null;
+  const s=gday(g.s),d=gday(g.d),t=Math.min(Math.max(gday(T0),s),d);
+  return {h,s,d,t,exp:h*(t-s)/(d-s),done:gdone(g,T0),left:Math.ceil((d-gday(T0))/GD)};
+}
+function gchart(g){
+  const c=gcalc(g);
+  if(!c)return '<p class="mu">Saisissez la date de début, l\'échéance (après le début) et le nombre d\'heures pour afficher le graphique.</p>';
+  const W=640,H=340,L=44,Tp=34,B=46,cw=74,ph=H-Tp-B,mx=Math.max(c.h,c.done,1),Y=v=>Tp+ph*(1-v/mx),base=Y(0),cx=[170,350,540];
+  let o=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<=5;i++){const v=mx*i/5,y=Y(v);o+=`<line x1="${L}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--bd)"/><text x="${L-6}" y="${y+4}" text-anchor="end">${+v.toFixed(1)}</text>`}
+  o+=`<text x="${L-6}" y="${Tp-14}" text-anchor="end">h</text>`;
+  const ex=c.exp,dn=c.done;
+  o+=`<rect x="${cx[0]-cw/2}" y="${Y(c.h)}" width="${cw}" height="${base-Y(c.h)}" fill="none" stroke="var(--mu)" rx="3"/>`;
+  if(ex>0)o+=`<rect x="${cx[0]-cw/2}" y="${Y(ex)}" width="${cw}" height="${base-Y(ex)}" fill="var(--bk)" stroke="var(--tx)" stroke-width=".6" rx="3"/>`;
+  const tl=(v,t,b)=>`<text x="${cx[0]+cw/2+8}" y="${Y(v)+4}" ${b?'style="fill:var(--tx);font-weight:700"':''}>${t}</text><line x1="${cx[0]+cw/2}" x2="${cx[0]+cw/2+5}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--mu)"/>`;
+  if(Math.abs(Y(ex)-base)>16)o+=tl(0,gfm(c.s));
+  if(Math.abs(Y(ex)-Y(c.h))>16)o+=tl(c.h,gfm(c.d));
+  o+=tl(ex,"Aujourd'hui "+gfm(c.t),true);
+  const x2=cx[1]-cw/2;
+  if(dn>=ex){if(dn>0)o+=`<rect x="${x2}" y="${Y(dn)}" width="${cw}" height="${base-Y(dn)}" fill="#f2c230" rx="3"/>`}
+  else{o+=`<rect x="${x2}" y="${Y(ex)}" width="${cw}" height="${base-Y(ex)}" fill="var(--bk)" stroke="var(--tx)" stroke-width=".6" rx="3"/>`;
+    if(dn>0)o+=`<rect x="${x2}" y="${Y(dn)}" width="${cw}" height="${base-Y(dn)}" fill="#f2c230" rx="3"/>`}
+  o+=`<text x="${cx[1]}" y="${Y(Math.max(dn,ex))-6}" text-anchor="middle" style="fill:var(--tx);font-weight:600">${+dn.toFixed(1)} / ${ex.toFixed(1)} h</text>`;
+  o+=`<rect x="${cx[2]-cw/2}" y="${Y(c.h)}" width="${cw}" height="${base-Y(c.h)}" fill="#9db4d6" rx="3"/><text x="${cx[2]}" y="${Y(c.h)-6}" text-anchor="middle" style="fill:var(--tx);font-weight:600">${c.h} h</text><line x1="${L}" x2="${W-10}" y1="${base}" y2="${base}" stroke="var(--mu)"/>`;
+  ["Temps (dates)","Réalisé","Objectif final"].forEach((t,i)=>o+=`<text x="${cx[i]}" y="${base+18}" text-anchor="middle" style="fill:var(--tx)">${t}</text>`);
+  return o+"</svg>";
+}
+function ginfo(g){
+  const c=gcalc(g);if(!c)return"";
+  const pct=Math.round(c.done/c.h*100),el=Math.round((c.t-c.s)/(c.d-c.s)*100),late=c.done<c.exp-0.01;
+  return `Il reste <b>${Math.max(c.left,0)}</b> j · Réalisé <b>${pct} %</b> · Temps écoulé <b>${el} %</b> · `+(c.left<0&&c.done<c.h?'<span class="ko"><b>Échéance dépassée ⛔</b></span>':late?`<span class="ko"><b>En retard de ${(c.exp-c.done).toFixed(1)} h ⚠️</b></span>`:'<span class="ok"><b>Dans les temps ✅</b></span>');
+}
+const gupd=(t,i)=>{$("gc"+i).innerHTML=gchart(t.goals[i]);$("gi"+i).innerHTML=ginfo(t.goals[i])};
+function obj(){
+  if(!S.tabs[GC])GC=0;const t=S.tabs[GC];t.goals=t.goals||[];
+  let H=0,X=0,h1=0,x1=0;
+  S.tabs.forEach(x=>(x.goals||[]).forEach(g=>{const h=+g.h||0,d=Math.min(gdone(g,"9999"),h);H+=h;X+=d;if(x===t){h1+=h;x1+=d}}));
+  $("main").innerHTML=`<div class="card" style="border-top:6px solid #4f5bd5;background:color-mix(in srgb,#4f5bd5 9%,var(--card))"><h2 style="color:#4f5bd5">🎯 Objectifs & tableau de bord</h2>
+  <div class="tabs">${S.tabs.map((x,i)=>`<button class="tab ${i===GC?"on":""}" data-gc="${i}" style="border:2px solid ${COL[i]};${i===GC?`background:${COL[i]};color:#fff`:`color:${COL[i]};font-weight:600`}">${esc(x.name)}</button>`).join("")}</div>
+  <div class="g"><div><small>Progression de ce domaine</small><b>${h1?Math.round(x1/h1*100):0} %</b></div><div><small>Progression globale</small><b>${H?Math.round(X/H*100):0} %</b></div></div>
+  <button class="p" id="ga">+ Ajouter un objectif</button></div>
+  ${t.goals.map((g,i)=>`<div class="card" style="border-inline-start:6px solid ${COL[GC]}"><div class="row" style="align-items:end"><label style="flex:2">Objectif<input data-gi="${i}" data-gk="t" value="${esc(g.t)}" placeholder="Ex. : terminer le chapitre 1"></label><label>Début<input type="date" data-gi="${i}" data-gk="s" value="${esc(g.s)}"></label><label>Échéance<input type="date" data-gi="${i}" data-gk="d" value="${esc(g.d)}"></label><label>Heures nécessaires<input type="number" min="0" step="0.5" data-gi="${i}" data-gk="h" value="${esc(g.h)}"></label></div>
+  <div id="gi${i}" style="font-size:14px;margin:8px 0"></div>
+  <div class="leg"><span><i style="background:#9db4d6"></i>Objectif final</span><span><i style="background:#f2c230"></i>Heures réalisées</span><span><i style="background:var(--bk);border:1px solid var(--mu)"></i>Noir : temps écoulé / heures manquantes</span></div>
+  <div id="gc${i}"></div>
+  <div class="row" style="align-items:end;margin-top:8px"><label>Heures réalisées aujourd'hui<input type="number" min="0" step="0.5" id="gh${i}"></label><button data-gl="${i}">+ Enregistrer</button><button data-gd="${i}">Supprimer l'objectif</button></div>
+  <div class="row" style="margin-top:8px">${(g.log||[]).map((l,j)=>`<span class="ck">${fm(l.date)} : +${l.hrs} h <b data-gx="${i},${j}" style="cursor:pointer;color:var(--ko);margin-inline-start:6px">✕</b></span>`).join("")}</div></div>`).join("")}`;
+  const q=(s,f)=>$("main").querySelectorAll(s).forEach(f);
+  q("[data-gc]",b=>b.onclick=()=>{GC=+b.dataset.gc;obj()});
+  $("ga").onclick=()=>{t.goals.push({t:"",s:ld(),d:"",h:"",log:[]});save();obj()};
+  q("[data-gk]",el=>el.oninput=()=>{const i=+el.dataset.gi;t.goals[i][el.dataset.gk]=el.value;save();gupd(t,i)});
+  q("[data-gd]",b=>b.onclick=()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent="Confirmer ?";return}t.goals.splice(+b.dataset.gd,1);save();obj()});
+  q("[data-gl]",b=>b.onclick=()=>{const i=+b.dataset.gl,h=parseFloat($("gh"+i).value);if(isNaN(h)||h<0)return;(t.goals[i].log=t.goals[i].log||[]).push({date:ld(),hrs:h});save();obj()});
+  q("[data-gx]",b=>b.onclick=()=>{const [i,j]=b.dataset.gx.split(",").map(Number);t.goals[i].log.splice(j,1);save();obj()});
+  t.goals.forEach((g,i)=>gupd(t,i));
+}
+function decv(){$("main").innerHTML='<div id="dcs"></div>';decR()}
+const isDone=(id,d)=>!!(S.ck[d]&&S.ck[d][id]);
+function chkCard(){
+  const H=S.pl.filter(p=>p.k==="c");if(!H.length)return "";
+  const td=ld(),days=[6,5,4,3,2,1,0].map(n=>nd(-n));
+  const rows=H.map(p=>{
+    let ap=0,dn=0,st=0,br=false;
+    const cells=days.map(d=>{const a=p.d==7||p.d==dow(d),x=isDone(p.id,d);
+      if(a&&(d<td||x)){ap++;if(x)dn++}
+      const lb=!a?"·":x?"✅":d<td?"❌":"☐";
+      return `<button data-ck="${p.id}|${d}" ${a?"":"disabled"} title="${fm(d)}" style="padding:2px 6px;min-width:40px;font-size:13px"><span class="mu" style="font-size:10px;display:block">${DS[dow(d)]}</span>${lb}</button>`}).join("");
+    for(let n=0;n<60&&!br;n++){const d=nd(-n),a=p.d==7||p.d==dow(d);if(!a)continue;if(isDone(p.id,d))st++;else if(d<td)br=true}
+    return `<div style="margin:10px 0"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px"><b>${esc(p.t)} <span class="mu">· ${esc(nmd(p.m))} · ${p.s}</span></b><span class="mu">${ap?Math.round(dn/ap*100)+" % sur 7 j":"—"} · 🔥 série : <b>${st}</b></span></div><div class="row" style="gap:4px;margin-top:4px">${cells}</div></div>`}).join("");
+  return `<div class="card"><h2>✅ Tâches à cocher (fait / pas fait)</h2><p class="mu">Touchez une case pour changer son état, y compris pour les jours précédents.</p>${rows}</div>`;
+}
+let LD=ld();
+function roll(){
+  const n=ld();if(n===LD)return;
+  const v=["o","t","j","p","g","d"].includes(String(S.cur)),a=document.activeElement,busy=v&&a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName);
+  const go=()=>{const o=LD;LD=n;if(JD===o)JD=n;if(TD===o)TD=n;if(v)render();else if($("fd")&&$("fd").value===o)$("fd").value=n};
+  if(!busy){go();return}
+  if($("nd"))return;
+  const d=document.createElement("div");d.className="ins";d.id="nd";d.textContent="📅 Nouveau jour ("+fm(n)+"). Terminez votre saisie, puis ";
+  const b=document.createElement("button");b.textContent="Passer à aujourd'hui";b.onclick=go;d.appendChild(b);$("main").prepend(d);
+}
+setInterval(roll,30000);document.addEventListener("visibilitychange",roll);
+render();
+</script>
+</body>
+</html>
