@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خطة</title>
+
+<!-- ===== بداية أسطر التطبيق (PWA): انسخها إلى أي صفحة عندك ===== -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2f5fa8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="الخطة">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<!-- ===== نهاية أسطر التطبيق ===== -->
+
+<style>
+  body{margin:0;padding:calc(env(safe-area-inset-top,0px) + 24px) 20px 24px;font-family:system-ui,"Segoe UI",Tahoma,Arial,sans-serif;color:#1f2328;background:#fff}
+  h1{font-size:34px;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #eee}
+</style>
+</head>
+<body>
+  <h1>الخطة</h1>
+  <p>123</p>
+
+<script>
+/* تسجيل الـ Service Worker (يجعل التطبيق قابلًا للتثبيت ويعمل بدون إنترنت) */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(console.error));
+}
+</script>
+</body>
+</html>
